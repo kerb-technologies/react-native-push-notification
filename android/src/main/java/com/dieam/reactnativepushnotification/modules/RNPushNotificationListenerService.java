@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Random;
 
+import com.moengage.pushbase.MoEPushHelper;
+
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.LOG_TAG;
 
 public class RNPushNotificationListenerService extends FirebaseMessagingService {
@@ -31,6 +33,13 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
     public void onMessageReceived(RemoteMessage message) {
         String from = message.getFrom();
         RemoteMessage.Notification remoteNotification = message.getNotification();
+
+        // Hand MoEngage notifications off to the MoEngage SDK.
+        if (MoEPushHelper.getInstance().isFromMoEngagePlatform(message.getData())) {
+          MoEPushHelper.getInstance().handlePushPayload(getApplicationContext(), message.getData());
+          Log.v(LOG_TAG, "onMessageReceived: HANDED OFF TO MOENGAGE");
+          return;
+        }
 
         final Bundle bundle = new Bundle();
         // Putting it from remoteNotification first so it can be overriden if message
